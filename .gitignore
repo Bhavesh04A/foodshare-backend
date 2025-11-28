@@ -1,0 +1,49 @@
+# ---------------------------
+# Node.js / Express Backend
+# ---------------------------
+
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# dotenv environment files (DO NOT COMMIT)
+.env
+.env.*               # For variations like .env.production
+
+# Build output
+dist/
+build/
+
+# Temporary files
+.tmp/
+.temp/
+*.tmp
+*.temp
+.DS_Store
+
+# VS Code settings
+.vscode/
+
+# OS-specific files
+Thumbs.db
+desktop.ini
+
+# Cache
+.cache/
+.eslintcache
+
+# Optional: If using multer temp upload directory
+uploads/
+uploads_temp/
