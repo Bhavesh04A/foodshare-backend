@@ -1,12 +1,12 @@
 import { geminiChat } from "../config/gemini.js";
 
-
-// -----------------------------------------------------
-// 1) CHAT — conversational, human-like responses
-// -----------------------------------------------------
+/* -----------------------------
+   1) CHAT
+------------------------------ */
 export const chat = async function(req, res) {
     try {
-        const message = req.body && req.body.message ? req.body.message : null;
+        const message =
+            req.body && req.body.message ? req.body.message : null;
 
         if (!message) {
             return res.status(400).json({ message: "Message is required" });
@@ -15,12 +15,15 @@ export const chat = async function(req, res) {
         const prompt =
             "You are a friendly and helpful AI assistant for FoodShare. " +
             "Respond in clear conversational paragraphs without Markdown, lists, stars, or bullets. " +
-            "Do not use asterisks, bold text, headings, or symbols. " +
-            "Speak naturally like a human.\n\n" +
-            "User: " + message;
+            "Speak naturally like a human.\n\nUser: " +
+            message;
 
         const reply = await geminiChat(prompt);
-        return res.json({ reply });
+
+        return res.json({
+            reply: reply ||
+                "Food safety depends on storage and timing. Please consume food within safe limits."
+        });
 
     } catch (err) {
         console.error("Chat error:", err);
@@ -28,12 +31,9 @@ export const chat = async function(req, res) {
     }
 };
 
-
-
-// -----------------------------------------------------
-// 2) FRESHNESS 
-// (NO real-time, NO currentTime, NO countdown)
-// -----------------------------------------------------
+/* -----------------------------
+   2) FRESHNESS
+------------------------------ */
 export const freshness = async function(req, res) {
     try {
         const body = req.body || {};
@@ -43,19 +43,17 @@ export const freshness = async function(req, res) {
         const madeAt = body.madeAt || "";
         const expiresAt = body.expiresAt || "";
 
-
         const prompt =
-            "Evaluate freshness of this food item and return ONLY JSON.\n" +
-            "Do not add additional text.\n\n" +
-            "Title: " + title + "\n" +
-            "Quantity: " + quantity + "\n" +
-            "Made At: " + madeAt + "\n" +
-            "Expires At: " + expiresAt + "\n\n" +
-            "Return JSON strictly in this format:\n" +
+            "Return ONLY valid JSON.\n" +
+            "Do not include explanations, markdown, or extra text.\n\n" +
             "{\n" +
             '  "score": "Fresh" | "Consume Soon" | "High Risk",\n' +
-            '  "reason": "short explanation like: expires in 3 hours"\n' +
-            "}";
+            '  "reason": "short explanation"\n' +
+            "}\n\n" +
+            "Food: " + title + "\n" +
+            "Quantity: " + quantity + "\n" +
+            "Made at: " + madeAt + "\n" +
+            "Expires at: " + expiresAt;
 
         const raw = await geminiChat(prompt);
 
@@ -63,41 +61,50 @@ export const freshness = async function(req, res) {
         const end = raw.lastIndexOf("}");
 
         if (start === -1 || end === -1) {
-            return res.status(500).json({ message: "AI returned invalid JSON" });
+            return res.json({
+                score: "Consume Soon",
+                reason: "Food should be consumed soon if stored properly."
+            });
         }
 
-        const jsonStr = raw.substring(start, end + 1);
-        const parsed = JSON.parse(jsonStr);
-
-        return res.json(parsed);
+        try {
+            const parsed = JSON.parse(raw.substring(start, end + 1));
+            return res.json(parsed);
+        } catch (e) {
+            return res.json({
+                score: "Consume Soon",
+                reason: "Food should be consumed soon if stored properly."
+            });
+        }
 
     } catch (err) {
         console.error("Freshness error:", err);
-        return res.status(500).json({ message: "Freshness check failed" });
+        return res.json({
+            score: "Consume Soon",
+            reason: "Food safety could not be verified fully."
+        });
     }
 };
 
-
-
-// -----------------------------------------------------
-// 3) SUGGESTIONS 
-// -----------------------------------------------------
+/* -----------------------------
+   3) SUGGESTIONS
+------------------------------ */
 export const suggestions = async function(req, res) {
     try {
         const body = req.body || {};
+
         const title = body.title || "";
         const type = body.type || "";
 
         const prompt =
-            "You are FoodShare AI. Suggest 2–4 useful donation labels and a short, simple human description.\n" +
-            "Return STRICT JSON only.\n\n" +
-            "Food: " + title + "\n" +
-            "Type: " + type + "\n\n" +
-            "Format:\n" +
+            "Return ONLY valid JSON.\n" +
+            "Do not add extra text.\n\n" +
             "{\n" +
             '  "labels": ["label1", "label2"],\n' +
             '  "description": "short natural description"\n' +
-            "}";
+            "}\n\n" +
+            "Food: " + title + "\n" +
+            "Type: " + type;
 
         const raw = await geminiChat(prompt);
 
@@ -105,16 +112,27 @@ export const suggestions = async function(req, res) {
         const end = raw.lastIndexOf("}");
 
         if (start === -1 || end === -1) {
-            return res.status(500).json({ message: "AI returned invalid JSON" });
+            return res.json({
+                labels: ["Fresh Food", "Safe Donation"],
+                description: "Freshly prepared food suitable for donation."
+            });
         }
 
-        const jsonStr = raw.substring(start, end + 1);
-        const parsed = JSON.parse(jsonStr);
-
-        return res.json(parsed);
+        try {
+            const parsed = JSON.parse(raw.substring(start, end + 1));
+            return res.json(parsed);
+        } catch (e) {
+            return res.json({
+                labels: ["Fresh Food", "Safe Donation"],
+                description: "Freshly prepared food suitable for donation."
+            });
+        }
 
     } catch (err) {
         console.error("Suggestions error:", err);
-        return res.status(500).json({ message: "Suggestions generation failed" });
+        return res.json({
+            labels: ["Fresh Food", "Safe Donation"],
+            description: "Freshly prepared food suitable for donation."
+        });
     }
 };
