@@ -1,22 +1,21 @@
 import fetch from "node-fetch";
 
 const GEMINI_ENDPOINT =
-    "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent";
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
-function cleanResponse(text) {
+// ✅ CLEAN HELPER (NO MARKDOWN, NO AUTOFORMAT ISSUES)
+function cleanText(text) {
     if (!text) return "";
     return text
-        .replace(/\*\*/g, "")
-        .replace(/\*/g, "")
-        .replace(/[`#_>-]/g, "")
+        .replace(/[#*`>|_-]/g, "")
         .replace(/\n{2,}/g, "\n")
         .trim();
 }
 
 export async function geminiChat(prompt) {
     try {
-        const res = await fetch(
-            `${GEMINI_ENDPOINT}?key=${process.env.GEMINI_API_KEY}`, {
+        const response = await fetch(
+            GEMINI_ENDPOINT + "?key=" + process.env.GEMINI_API_KEY, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -27,23 +26,34 @@ export async function geminiChat(prompt) {
             }
         );
 
-        const data = await res.json();
+        const data = await response.json();
+
+        // 🔎 Debug log (KEEP for hackathon)
+        console.log("GEMINI RAW RESPONSE:", JSON.stringify(data));
 
         if (!data ||
             !data.candidates ||
-            !data.candidates[0] ||
+            data.candidates.length === 0 ||
             !data.candidates[0].content ||
-            !data.candidates[0].content.parts ||
-            !data.candidates[0].content.parts[0] ||
-            !data.candidates[0].content.parts[0].text
+            !data.candidates[0].content.parts
         ) {
             return "";
         }
 
-        return cleanResponse(data.candidates[0].content.parts[0].text);
+        let text = "";
+
+        for (let i = 0; i < data.candidates[0].content.parts.length; i++) {
+            const part = data.candidates[0].content.parts[i];
+            if (part.text) {
+                text += part.text + " ";
+            }
+        }
+
+        // ✅ APPLY CLEANING HERE
+        return cleanText(text);
 
     } catch (err) {
-        console.error("Gemini REST API Error:", err);
+        console.error("Gemini API error:", err);
         return "";
     }
 }
