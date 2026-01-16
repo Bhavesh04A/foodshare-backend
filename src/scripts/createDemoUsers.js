@@ -6,6 +6,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const demoUsers = [{
+        name: 'Demo Waste Partner',
+        email: 'demo_waste@foodshare.com',
+        password: 'demo123',
+        role: 'waste_partner',
+        pinCode: '400001',
+        zone: 'A',
+        verified: true
+    },
+    {
         name: 'Demo Restaurant',
         email: 'demo_restaurant@foodshare.com',
         password: 'demo123',
@@ -31,12 +40,15 @@ const demoUsers = [{
         pinCode: '400003',
         zone: 'C',
         verified: true
-    }
+    },
+
 ];
 
 const createDemoUsers = async() => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/foodshare');
+        await mongoose.connect(
+            process.env.MONGODB_URI || 'mongodb://localhost:27017/foodshare'
+        );
         console.log('Connected to MongoDB');
 
         // Delete existing demo users
