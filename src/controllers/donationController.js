@@ -172,8 +172,12 @@ export const confirmPickup = async function(req, res) {
             return res.status(404).json({ message: "Donation not found" });
         }
 
-        if (!validateQrToken(qrToken, donation)) {
-            return res.status(400).json({ message: "Invalid QR token" });
+        // 🔓 MVP MODE:
+        // Skip strict QR validation for expired donations (recycling)
+        if (donation.status !== "expired") {
+            if (!validateQrToken(qrToken, donation)) {
+                return res.status(400).json({ message: "Invalid QR token" });
+            }
         }
 
         // 🔥 ROLE-AWARE CONFIRMATION
