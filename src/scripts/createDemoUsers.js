@@ -28,7 +28,7 @@ const demoUsers = [{
         email: 'demo_ngo@foodshare.com',
         password: 'demo123',
         role: 'ngo',
-        pinCode: '400002',
+        pinCode: '400001',
         zone: 'B',
         verified: true
     },
@@ -37,7 +37,7 @@ const demoUsers = [{
         email: 'demo_volunteer@foodshare.com',
         password: 'demo123',
         role: 'volunteer',
-        pinCode: '400003',
+        pinCode: '400001',
         zone: 'C',
         verified: true
     },
@@ -47,7 +47,7 @@ const demoUsers = [{
 const createDemoUsers = async() => {
     try {
         await mongoose.connect(
-            process.env.MONGODB_URI || 'mongodb://localhost:27017/foodshare'
+            process.env.MONGO_URI || 'mongodb://localhost:27017/foodshare'
         );
         console.log('Connected to MongoDB');
 
