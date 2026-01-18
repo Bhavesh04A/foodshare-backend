@@ -1,23 +1,55 @@
 import mongoose from "mongoose";
 
 const donationSchema = new mongoose.Schema({
-    donorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    donorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
 
-    title: { type: String, required: true },
-    quantity: { type: Number, required: true },
-    type: { type: String, enum: ["veg", "non-veg"], required: true },
+    title: {
+        type: String,
+        required: true
+    },
+
+    quantity: {
+        type: Number,
+        required: true
+    },
+
+    type: {
+        type: String,
+        enum: ["veg", "non-veg"],
+        required: true
+    },
+
     labels: [{ type: String }],
 
     images: [{
         data: Buffer,
-        contentType: String,
-    }, ],
+        contentType: String
+    }],
 
-    madeAt: { type: Date, required: true },
-    expiresAt: { type: Date, required: true },
+    madeAt: {
+        type: Date,
+        required: true
+    },
 
-    pinCode: { type: String, required: true },
-    zone: { type: String, enum: ["A", "B", "C", "D", ""], default: "" },
+    expiresAt: {
+        type: Date,
+        required: true
+    },
+
+    pinCode: {
+        type: String,
+        required: true
+    },
+
+    zone: {
+        type: String,
+        enum: ["A", "B", "C", "D", ""],
+        default: ""
+    },
 
     status: {
         type: String,
@@ -27,17 +59,44 @@ const donationSchema = new mongoose.Schema({
             "picked",
             "completed",
             "expired",
-            "recycled",
+            "recycled"
         ],
-        default: "available",
+        default: "available"
     },
 
-    acceptedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // NGO
-    volunteerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Volunteer
-    recycledBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Waste Partner
+    acceptedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
 
-    qrToken: { type: String, required: true },
-    freshnessScore: { type: String },
-}, { timestamps: true });
+    volunteerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
+
+    // ✅ NEW — Waste Partner who recycled the food
+    recycledBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+
+    qrToken: {
+        type: String,
+        required: true
+    },
+
+    freshnessScore: {
+        type: String // "Fresh", "Consume Soon", "High Risk"
+    },
+
+    // ✅ Smart Prioritization
+    isUrgent: {
+        type: Boolean,
+        default: false
+    }
+}, {
+    timestamps: true
+});
 
 export default mongoose.model("Donation", donationSchema);

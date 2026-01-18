@@ -6,7 +6,9 @@ import {
     confirmPickup,
     getUserDonations,
     deleteDonation,
-    volunteerAcceptTask
+    volunteerAcceptTask,
+    getExpiredDonationsForPartner, // ✅ NEW
+    acceptExpiredDonation // ✅ NEW
 } from "../controllers/donationController.js";
 import { authenticate } from "../middleware/auth.js";
 import { allowRoles } from "../middleware/roleCheck.js";
@@ -14,7 +16,7 @@ import { upload } from "../middleware/upload.js";
 
 const router = express.Router();
 
-// Restaurant creates donation
+/* ---------------- RESTAURANT ---------------- */
 router.post(
     "/",
     authenticate,
@@ -23,7 +25,7 @@ router.post(
     createDonation
 );
 
-// NGO & Volunteer can view available donations
+/* ---------------- NGO & VOLUNTEER ---------------- */
 router.get(
     "/available",
     authenticate,
@@ -31,7 +33,6 @@ router.get(
     getAvailableDonations
 );
 
-// NGO accepts donation (marks status = accepted)
 router.post(
     "/:id/accept",
     authenticate,
@@ -39,7 +40,6 @@ router.post(
     acceptDonation
 );
 
-// Volunteer accepts task (assigns volunteerId)
 router.post(
     "/:id/volunteer-accept",
     authenticate,
@@ -47,27 +47,43 @@ router.post(
     volunteerAcceptTask
 );
 
-// NGO or Volunteer confirms pickup using QR
 router.post(
     "/:id/confirm",
     authenticate,
-    allowRoles("ngo", "volunteer"),
+    allowRoles("ngo", "volunteer", "waste_partner"), // ✅ allow waste partner
     confirmPickup
 );
 
-// Each user (restaurant, ngo, volunteer) fetches their own donations
+/* ---------------- COMMON ---------------- */
 router.get(
     "/mine",
     authenticate,
     getUserDonations
 );
 
-// Restaurant deletes donation
 router.delete(
     "/:id",
     authenticate,
     allowRoles("restaurant"),
     deleteDonation
+);
+
+/* ================= WASTE PARTNER (NEW) ================= */
+
+// View expired donations
+router.get(
+    "/expired",
+    authenticate,
+    allowRoles("waste_partner"),
+    getExpiredDonationsForPartner
+);
+
+// Accept expired donation for recycling
+router.post(
+    "/:id/recycle-accept",
+    authenticate,
+    allowRoles("waste_partner"),
+    acceptExpiredDonation
 );
 
 export default router;

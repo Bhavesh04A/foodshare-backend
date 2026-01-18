@@ -8,14 +8,6 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import ngoRoutes from "./routes/ngoRoutes.js";
 import volunteerRoutes from "./routes/volunteerRoutes.js";
 import statsRoutes from "./routes/statsRoutes.js";
-import cron from "node-cron";
-import { expireDonationsJob } from "./utils/expireDonations.js";
-import wasteRoutes from "./routes/wasteRoutes.js";
-
-
-
-/* CRON — runs every 5 minutes */
-cron.schedule("*/5 * * * *", expireDonationsJob);
 
 const app = express();
 
@@ -32,8 +24,6 @@ app.use("/analytics", analyticsRoutes);
 app.use("/ngo", ngoRoutes);
 app.use("/volunteer", volunteerRoutes);
 app.use("/api/stats", statsRoutes);
-app.use("/waste", wasteRoutes);
-
 
 
 app.get("/", (req, res) => {
